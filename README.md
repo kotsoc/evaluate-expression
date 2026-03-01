@@ -3,6 +3,10 @@ A simple program that evaluates a string consiting of numbers and mathematical o
 - Support the 4 basic operators: Addition (+), Subtraction (-), Multiplication (*), and Division (/).
 - Support both positive and negative integers.
 
+## Requirements
+- Java 21
+- Maven 3.6.0 or higher (or use the included Maven wrapper)
+
 ## Usage
 
 **Build the project:**
