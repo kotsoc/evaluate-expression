@@ -1,4 +1,4 @@
-package lib;
+package app;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,9 +30,11 @@ public class ExpressionEvaluator {
         if (isInValidExpression(expression)) {
             return "";
         }
-        return multipleDivide(expression);
+        // First evaluate all the multiplication and division operations and then evaluate the addition and subtraction operations
+        expression = multipleDivide(expression);
+        return addSubtract(expression);
     }
-    //7543
+
     private ArithmeticOperand findLeftOperand(String expression, int i) {
         //Sanity check to ensure we don't go out of bounds
         if(i < 0) {
@@ -57,7 +59,7 @@ public class ExpressionEvaluator {
         }
         return new ArithmeticOperand(leftOperand, Math.max(i, 0), endIndex);
     }
-
+    
     private ArithmeticOperand findRightOperand(String expression, int i) {
         //Sanity check to ensure we don't go out of bounds
         if(i >= expression.length()) {
@@ -91,6 +93,7 @@ public class ExpressionEvaluator {
         return false;
     }
 
+    // This method will evaluate all the multiplication and division operations in the expression and return the result expression
     String multipleDivide(String expression) {
         BigDecimal result = BigDecimal.ZERO;
         ArithmeticOperand leftOperand, rightOperand;
@@ -104,7 +107,36 @@ public class ExpressionEvaluator {
                     if(rightOperand.value.compareTo(BigDecimal.ZERO) == 0) {
                        throw new ArithmeticException("Division by zero is not allowed");
                     }
-                    result = leftOperand.value.divide(rightOperand.value, 10, RoundingMode.HALF_UP);
+                    result = leftOperand.value.divide(rightOperand.value, 2, RoundingMode.HALF_UP);
+                }
+                result = result.stripTrailingZeros();
+                //Take from the start to the space before the left operand, add the result and then add the rest of the expression after the right operand
+                System.out.println("First substring '" +expression.substring(0, leftOperand.startIndex)+"'");
+                System.out.println("Second substring '" +expression.substring(rightOperand.endIndex + 1)+"'");
+                expression = expression.substring(0, leftOperand.startIndex) +" "+ result.toPlainString() + " " + expression.substring(rightOperand.endIndex + 1);
+                i = leftOperand.startIndex + result.toPlainString().length() - 1; //It is ok to skip the space after the operand 
+                System.out.println("Intermediate expression after evaluating operator at index " + i + ": " + expression);
+            }
+        }
+        return expression;
+    }
+
+        // This method will evaluate all the multiplication and division operations in the expression and return the result expression
+    String addSubtract(String expression) {
+        BigDecimal result = BigDecimal.ZERO;
+        ArithmeticOperand leftOperand, rightOperand;
+        for (int i = 0; i < expression.length(); i++) {
+            if (expression.charAt(i) == '+' || expression.charAt(i) == '-') {
+                if(i == 0 || expression.charAt(i-1) == ' ' && (i+1 < expression.length() && expression.charAt(i+1) != ' ')) {
+                    continue; //This is a sign for the right operand, not an operator
+                }
+
+                leftOperand = findLeftOperand(expression, i-2);
+                rightOperand = findRightOperand(expression, i+2);
+                if(expression.charAt(i) == '+') {
+                    result = leftOperand.value.add(rightOperand.value);
+                } else {
+                    result = leftOperand.value.subtract(rightOperand.value);
                 }
                 //Take from the start to the space before the left operand, add the result and then add the rest of the expression after the right operand
                 System.out.println("First substring '" +expression.substring(0, leftOperand.startIndex)+"'");
@@ -121,4 +153,3 @@ public class ExpressionEvaluator {
 // overflows
 // valid expression
 // testing
- 

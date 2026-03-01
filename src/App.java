@@ -1,4 +1,6 @@
-import lib.ExpressionEvaluator;
+package com.example.evaluateexpression;
+
+import app.java.lib.ExpressionEvaluator;
 
 public class App {
     public static void main(String[] args) throws Exception {
