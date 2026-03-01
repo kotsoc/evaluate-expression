@@ -21,18 +21,16 @@ public class ExpressionEvaluator {
         }
     }
 
-    private Set<Character> operators = new HashSet<>(Arrays.asList('+', '-', '*', '/'));
-
     // This method assumes the input is a valid mathematical expression in string
     // format.
     // In case of invalid or no input, it will return BigDecimal.ZERO
     public String evaluate(String expression) {
-        if (isInValidExpression(expression)) {
+        if (isInvalidExpression(expression)) {
             return "";
         }
-        // First evaluate all the multiplication and division operations and then evaluate the addition and subtraction operations
+        // First evaluate all the multiplication/division operations and then evaluate the addition/subtraction operations
         expression = multipleDivide(expression);
-        return addSubtract(expression);
+        return addSubtract(expression).trim();
     }
 
     private ArithmeticOperand findLeftOperand(String expression, int i) {
@@ -85,7 +83,7 @@ public class ExpressionEvaluator {
     // It will check for invalid starting/ending characters and null or empty
     // expression.
     // A complete check is out of scope for this example.
-    boolean isInValidExpression(String expression) {
+    boolean isInvalidExpression(String expression) {
         if (expression == null || expression.isEmpty() || expression.startsWith("*") || expression.endsWith("*")
                 || expression.startsWith("/") || expression.endsWith("/")) {
             return true;
@@ -94,7 +92,7 @@ public class ExpressionEvaluator {
     }
 
     // This method will evaluate all the multiplication and division operations in the expression and return the result expression
-    String multipleDivide(String expression) {
+    private String multipleDivide(String expression) {
         BigDecimal result = BigDecimal.ZERO;
         ArithmeticOperand leftOperand, rightOperand;
         for (int i = 0; i < expression.length(); i++) {
@@ -107,22 +105,19 @@ public class ExpressionEvaluator {
                     if(rightOperand.value.compareTo(BigDecimal.ZERO) == 0) {
                        throw new ArithmeticException("Division by zero is not allowed");
                     }
-                    result = leftOperand.value.divide(rightOperand.value, 2, RoundingMode.HALF_UP);
+                    result = leftOperand.value.divideToIntegralValue(rightOperand.value);
                 }
-                result = result.stripTrailingZeros();
+       
                 //Take from the start to the space before the left operand, add the result and then add the rest of the expression after the right operand
-                System.out.println("First substring '" +expression.substring(0, leftOperand.startIndex)+"'");
-                System.out.println("Second substring '" +expression.substring(rightOperand.endIndex + 1)+"'");
                 expression = expression.substring(0, leftOperand.startIndex) +" "+ result.toPlainString() + " " + expression.substring(rightOperand.endIndex + 1);
                 i = leftOperand.startIndex + result.toPlainString().length() - 1; //It is ok to skip the space after the operand 
-                System.out.println("Intermediate expression after evaluating operator at index " + i + ": " + expression);
             }
         }
         return expression;
     }
 
-        // This method will evaluate all the multiplication and division operations in the expression and return the result expression
-    String addSubtract(String expression) {
+    // This method will evaluate all the addition and subtraction operations in the expression and return the result expression
+    private String addSubtract(String expression) {
         BigDecimal result = BigDecimal.ZERO;
         ArithmeticOperand leftOperand, rightOperand;
         for (int i = 0; i < expression.length(); i++) {
@@ -139,17 +134,10 @@ public class ExpressionEvaluator {
                     result = leftOperand.value.subtract(rightOperand.value);
                 }
                 //Take from the start to the space before the left operand, add the result and then add the rest of the expression after the right operand
-                System.out.println("First substring '" +expression.substring(0, leftOperand.startIndex)+"'");
-                System.out.println("Second substring '" +expression.substring(rightOperand.endIndex + 1)+"'");
                 expression = expression.substring(0, leftOperand.startIndex) +" "+ result.toPlainString() + " " + expression.substring(rightOperand.endIndex + 1);
                 i = leftOperand.startIndex + result.toPlainString().length() - 1; //It is ok to skip the space after the operand 
-                System.out.println("Intermediate expression after evaluating operator at index " + i + ": " + expression);
             }
         }
         return expression;
     }
 }
-
-// overflows
-// valid expression
-// testing
